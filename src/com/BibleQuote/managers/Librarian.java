@@ -76,27 +76,10 @@ public class Librarian {
         historyManager = new SimpleHistoryManager(repository, PreferenceHelper.getHistorySize());
 
 		getModules();
-        refreshLibrary();
 	}
 
     public EventManager getEventManager() {
         return libCtrl.getEventManager();
-    }
-
-    private void refreshLibrary() {
-        Thread taskRefresh = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                android.util.Log.d(TAG, "Start refresh library...");
-                try {
-                    Thread.sleep(15000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                loadFileModules();
-            }
-        });
-        taskRefresh.start();
     }
 
 	/**
@@ -565,8 +548,9 @@ public class Librarian {
     }
 
     public ArrayList<String> getVersesText() {
-        ArrayList<Verse> verses = currChapter.getVerseList();
         ArrayList<String> result = new ArrayList<String>();
+        if (currChapter == null) return result;
+        ArrayList<Verse> verses = currChapter.getVerseList();
         for (int i = 0 ; i < verses.size() ; i++) {
             result.add(StringProc.cleanVerseText(verses.get(i).getText()));
         }
