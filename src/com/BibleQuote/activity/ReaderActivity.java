@@ -34,6 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.BibleQuote.BibleQuoteApp;
 import com.BibleQuote.R;
+import com.BibleQuote.async.AsyncOpenParChapter;
 import com.BibleQuote.managers.bookmarks.BookmarksManager;
 import com.BibleQuote.managers.bookmarks.PreferenceRepository;
 import com.BibleQuote.widget.ReaderWebView;
@@ -90,6 +91,7 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
     private final int ID_BOOKMARKS = 4;
     private final int ID_PARALLELS = 5;
     private final int ID_SETTINGS = 6;
+	private final int ID_PARTRANSLATES = 7;
 
     @Override
     public void onStopSpeak() {
@@ -184,7 +186,12 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
         mAsyncManager.setupTask(mTask, this);
     }
 
-    private void initialyzeViews() {
+	private void openParChapterFromLink(BibleReference CurrOsisLink, BibleReference osisLinkParTr) {
+		mTask = new AsyncOpenParChapter(progressMessage, false, myLibrarian, CurrOsisLink, osisLinkParTr);
+		mAsyncManager.setupTask(mTask, this);
+	}
+
+	private void initialyzeViews() {
         btnChapterNav = (LinearLayout)findViewById(R.id.btn_chapter_nav);
 
         ImageButton btnChapterPrev = (ImageButton)findViewById(R.id.btn_reader_prev);
@@ -265,6 +272,10 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 				Intent intentAbout = new Intent().setClass(getApplicationContext(), AboutActivity.class);
 				startActivity(intentAbout);
 				break;
+			case R.id.action_bar_partranslates:
+				Intent intentParTranslates = new Intent().setClass(getApplicationContext(), LibraryActivity.class);
+				startActivityForResult(intentParTranslates, ID_PARTRANSLATES);
+				break;
 			default:
 				return false;
 		}
@@ -302,14 +313,32 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 				Bundle extras = data.getExtras();
 				BibleReference osisLink = new BibleReference(extras.getString("linkOSIS"));
 				if (myLibrarian.isOSISLinkValid(osisLink)) {
-                    openChapterFromLink(osisLink);
+
+					if (myLibrarian.ParChapter == null) {
+						openChapterFromLink(osisLink);
+					} else {
+						openParChapterFromLink(osisLink, myLibrarian.ParOsisLink);
+					}
+
                 }
+			} else if (requestCode == ID_PARTRANSLATES) {
+				Bundle extras = data.getExtras();
+				BibleReference linkParTr = new BibleReference(extras.getString("linkOSIS"));
+				if (myLibrarian.isOSISLinkValid(linkParTr)) {
+					openParChapterFromLink(myLibrarian.getCurrentOSISLink(), linkParTr);
+				}
 			}
 		} else if (requestCode == ID_SETTINGS) {
             vWeb.setMode(PreferenceHelper.isReadModeByDefault() ? ReaderWebView.Mode.Read : ReaderWebView.Mode.Study);
 			updateActivityMode();
-            openChapterFromLink(myLibrarian.getCurrentOSISLink());
-        }
+
+			if (myLibrarian.ParChapter == null) {
+				openChapterFromLink(myLibrarian.getCurrentOSISLink());
+			} else {
+				openParChapterFromLink(myLibrarian.getCurrentOSISLink(), myLibrarian.ParOsisLink);
+			}
+
+		}
 	}
 
 	public void setTextInWebView() {
@@ -374,8 +403,14 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 	};
 
 	private void viewCurrentChapter() {
-        openChapterFromLink(myLibrarian.getCurrentOSISLink());
-    }
+
+		if (myLibrarian.ParChapter == null) {
+			openChapterFromLink(myLibrarian.getCurrentOSISLink());
+		} else {
+			openParChapterFromLink(myLibrarian.getCurrentOSISLink(), myLibrarian.ParOsisLink);
+		}
+
+	}
 
 	public void viewChapterNav() {
 		if (chapterNavHandler.hasMessages(R.id.view_chapter_nav)) {
@@ -456,6 +491,26 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 					}
 				}
 			}
+
+			if (task instanceof AsyncOpenParChapter) {
+				AsyncOpenParChapter t = ((AsyncOpenParChapter) task);
+				if (t.isSuccess()) {
+
+					if (myLibrarian.ParChapter != null) {
+						chapterInHTML = myLibrarian.getParChapterHTMLView();
+					}
+
+					setTextInWebView();
+				} else {
+					Exception e = t.getException();
+					if (e instanceof OpenModuleException) {
+						ExceptionHelper.onOpenModuleException((OpenModuleException) e, this, TAG);
+					} else if (e instanceof BookNotFoundException) {
+						ExceptionHelper.onBookNotFoundException((BookNotFoundException) e, this, TAG);
+					}
+				}
+			}
+
 		}
 	}
 
