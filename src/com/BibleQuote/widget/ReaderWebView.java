@@ -395,8 +395,6 @@ public class ReaderWebView extends WebView
         return false;
     }
 
-    public boolean onFling(MotionEvent e1, MotionEvent e2,
-			float velocityX, float velocityY) {
 	public boolean onFling(MotionEvent e1, MotionEvent e2,
 						   float velocityX, float velocityY) {
 		notifyListeners(ChangeCode.onScroll);
@@ -451,8 +449,6 @@ public class ReaderWebView extends WebView
         }
     }
 
-    final class chromeClient extends WebChromeClient {
-		chromeClient() {}
 	final class chromeClient extends WebChromeClient {
 		chromeClient() {
 		}
