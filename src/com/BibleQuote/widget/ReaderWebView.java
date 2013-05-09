@@ -186,14 +186,23 @@ public class ReaderWebView extends WebView
 
 		StringBuilder style = new StringBuilder();
 		style.append("<style type=\"text/css\">\r\n");
-		style.append("body {\r\n");
+
+        style.append("@font-face {\r\n");
+        style.append("font-family: AmasisMTW1G;\r\n");
+        style.append("src: url(\"file:///ebook/fonts/AmasisMTW1G.otf\")\r\n");
+        style.append("}\r\n");
+
+        style.append("body {\r\n");
 		style.append("padding-bottom: 50px;\r\n");
 		if (PreferenceHelper.textAlignJustify()) {
 			style.append("text-align: justify;\r\n");
 		}
 		//style.append("font-family: Georgia, Tahoma, Verdana, sans-serif;\r\n");
 		style.append("color: ").append(textColor).append(";\r\n");
-		style.append("font-size: ").append(textSize).append("pt;\r\n");
+
+        style.append("font-family: AmasisMTW1G;\r\n");
+
+        style.append("font-size: ").append(textSize).append("pt;\r\n");
 		style.append("line-height: 1.25;\r\n");
 		style.append("background: ").append(backColor).append(";\r\n");
 		style.append("}\r\n");
