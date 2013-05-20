@@ -156,7 +156,11 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.reader);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+		if ( !DeviceInfo.isEInkSonyPRST()) {
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		}
+
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 		getSupportActionBar().setIcon(R.drawable.app_logo);
