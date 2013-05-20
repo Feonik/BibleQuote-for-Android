@@ -67,6 +67,7 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 		return myLibrarian;
 	}
 
+
 	private Librarian myLibrarian;
 	private AsyncManager mAsyncManager;
 	private Task mTask;
