@@ -290,8 +290,23 @@ public class ReaderWebView extends WebView
 
 	public boolean onDoubleTap(MotionEvent event) {
 		if (currMode != Mode.Speak) {
-			setMode(currMode == Mode.Study ? Mode.Read : Mode.Study);
+			//setMode(currMode == Mode.Study ? Mode.Read : Mode.Study);
+
+			int x = (int) event.getX();
+			int y = (int) event.getY();
+//			if (currMode == Mode.Study) {
+				if (Build.VERSION.SDK_INT < 8) {
+					y += getScrollY();
+				}
+				float density = getContext().getResources().getDisplayMetrics().density;
+				x = (int) (x / density);
+				y = (int) (y / density);
+
+				loadUrl("javascript:dblClickWord(" + x + ", " + y + ");");
+//			} else if (currMode == Mode.Read) {
+
 		}
+
 		return false;
 	}
 
@@ -310,6 +325,8 @@ public class ReaderWebView extends WebView
 			return true;
 		}
 	}
+
+	public String sWortForDict = "";
 
 	final class JavaScriptInterface {
 
@@ -364,5 +381,12 @@ public class ReaderWebView extends WebView
 		public void alert(final String message) {
 			Log.i(TAG, "JavaScriptInterface.alert()");
 		}
+
+		public void onDoubleClickOfWord(String SpanWord) {
+			sWortForDict = SpanWord;
+			notifyListeners(ChangeCode.onDoubleTap);
+		}
+
+
 	}
 }

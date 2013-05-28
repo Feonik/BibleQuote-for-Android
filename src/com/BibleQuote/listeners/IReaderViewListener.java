@@ -10,7 +10,8 @@ public interface IReaderViewListener {
 		onUpNavigation,
 		onDownNavigation,
 		onLeftNavigation,
-		onRightNavigation
+		onRightNavigation,
+		onDoubleTap
 	}
 
 	public void onReaderViewChange(ChangeCode code);

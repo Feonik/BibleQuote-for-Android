@@ -26,7 +26,7 @@ function deselectVerse(id) {
 
 function handleClick(x, y) {
 	var element = document.elementFromPoint(x, y);
-	
+
 	while (element != null && element.id.indexOf('verse') == -1) {
 		if (element instanceof window.HTMLAnchorElement && (element.href.indexOf('#') != -1)) {
 			return;
@@ -42,3 +42,17 @@ function gotoVerse(number) {
     document.location.href='#verse_' + number;
 }
 
+function dblClickWord(x, y) {
+	var element = document.elementFromPoint(x, y);
+
+	while ((element != null) && (element.tagName.indexOf('SPAN') == -1)) {
+//		if (element instanceof window.HTMLAnchorElement && (element.href.indexOf('#') != -1)) {
+//			return;
+//		}
+		element = element.parentElement;
+	}
+
+	if (element != null) {
+		reader.onDoubleClickOfWord(element.innerHTML);
+	}
+}
