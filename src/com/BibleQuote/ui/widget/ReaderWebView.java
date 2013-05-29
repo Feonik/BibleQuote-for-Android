@@ -276,6 +276,12 @@ public class ReaderWebView extends WebView
 	}
 
 	public void onLongPress(MotionEvent event) {
+		// вынужденная мера, после DoubleTap при страрте стороннего приложения
+		// почему-то срабатывает иногда и LongPress
+		if (event.getEventTime() - lDblTapTime < 400) {
+			return;
+		}
+
 		notifyListeners(ChangeCode.onLongPress);
 	}
 
@@ -288,7 +294,13 @@ public class ReaderWebView extends WebView
 	public void onShowPress(MotionEvent event) {
 	}
 
+	long lDblTapTime = 0;
+
 	public boolean onDoubleTap(MotionEvent event) {
+		// вынужденная мера, после DoubleTap при страрте стороннего приложения
+		// почему-то срабатывает иногда и LongPress
+		lDblTapTime = event.getEventTime();
+
 		if (currMode != Mode.Speak) {
 			//setMode(currMode == Mode.Study ? Mode.Read : Mode.Study);
 
