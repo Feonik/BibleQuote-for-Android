@@ -74,7 +74,9 @@ public class FsChapterController implements IChapterController {
 				verseText = verseText
 						.replaceAll("^(<[^/]+?>)*?(\\d+)(</(.)+?>){0,1}?\\s+",
 								"$1<b>$2</b>$3 ").replaceAll(
-								"null", "");
+								"null", "").replaceAll("([>\\s]\\b)([\\p{L}]+?)(\\b)",
+								"$1<span>$2</span>$3");
+								//"$1<span onDblClick='dblClickWord(this)'>$2</span>$3");
 			}
 
 			chapterHTML.append(

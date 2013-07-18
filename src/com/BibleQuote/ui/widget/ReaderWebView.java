@@ -402,6 +402,12 @@ public class ReaderWebView extends WebView
 	}
 
 	public void onLongPress(MotionEvent event) {
+		// вынужденная мера, после DoubleTap при страрте стороннего приложения
+		// почему-то срабатывает иногда и LongPress
+		if (event.getEventTime() - lDblTapTime < 400) {
+			return;
+		}
+
 		notifyListeners(ChangeCode.onLongPress);
 	}
 
@@ -414,10 +420,31 @@ public class ReaderWebView extends WebView
 	public void onShowPress(MotionEvent event) {
 	}
 
+	long lDblTapTime = 0;
+
 	public boolean onDoubleTap(MotionEvent event) {
+		// вынужденная мера, после DoubleTap при страрте стороннего приложения
+		// почему-то срабатывает иногда и LongPress
+		lDblTapTime = event.getEventTime();
+
 		if (currMode != Mode.Speak) {
-			setMode(currMode == Mode.Study ? Mode.Read : Mode.Study);
+			//setMode(currMode == Mode.Study ? Mode.Read : Mode.Study);
+
+			int x = (int) event.getX();
+			int y = (int) event.getY();
+//			if (currMode == Mode.Study) {
+				if (Build.VERSION.SDK_INT < 8) {
+					y += getScrollY();
+				}
+				float density = getContext().getResources().getDisplayMetrics().density;
+				x = (int) (x / density);
+				y = (int) (y / density);
+
+				loadUrl("javascript:dblClickWord(" + x + ", " + y + ");");
+//			} else if (currMode == Mode.Read) {
+
 		}
+
 		return false;
 	}
 
@@ -460,6 +487,8 @@ public class ReaderWebView extends WebView
 			return true;
 		}
 	}
+
+	public String sWortForDict = "";
 
 	final class JavaScriptInterface {
 
@@ -514,5 +543,12 @@ public class ReaderWebView extends WebView
 		public void alert(final String message) {
 			Log.i(TAG, "JavaScriptInterface.alert()");
 		}
+
+		public void onDoubleClickOfWord(String SpanWord) {
+			sWortForDict = SpanWord;
+			notifyListeners(ChangeCode.onDoubleTap);
+		}
+
+
 	}
 }
