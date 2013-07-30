@@ -695,9 +695,17 @@ public class ReaderWebView extends WebView
 
 			String sVerseText = myLibrarian.getCurrChapter().getVerse(iVerseNumber).getText();
 
-			sVerseText = myLibrarian.getVerseTextHtmlBody(myLibrarian.getCurrModule(), sVerseText)
-					  .replaceAll("([^\\\\])(')", "$1\\\\$2")
-					  .replace(String.format("%n"), "\\n");
+//			if (myLibrarian.isShowParTranslates) {
+//				sVerseText = myLibrarian.getVerseTextHtmlBodyForParTr(myLibrarian.getCurrModule(), sVerseText)
+//						  .replaceAll("([^\\\\])(')", "$1\\\\$2")
+//						  .replace(String.format("%n"), "\\n");
+//
+//			} else {
+				sVerseText = myLibrarian.getVerseTextHtmlBody(myLibrarian.getCurrModule(), sVerseText)
+						  .replaceAll("([^\\\\])(')", "$1\\\\$2")
+						  .replace(String.format("%n"), "\\n");
+//			}
+
 
 
 			final String sVerseText_final = sVerseText;

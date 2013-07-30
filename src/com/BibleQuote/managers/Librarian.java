@@ -276,7 +276,7 @@ public class Librarian {
 					sChapNumber2 = Integer.toString(iChapNumber2);
 
 					if (Book2 != null) {
-						Chapter2 = getChapterByNumber(Book2, iChapNumber2);
+						Chapter2 = getChapterByNumber(Book2, iChapNumber2, false);
 					}
 				}
 
@@ -317,7 +317,7 @@ public class Librarian {
 						sChapNumber2 = Integer.toString(iChapNumber2);
 
 						if (Book2 != null) {
-							Chapter2 = getChapterByNumber(Book2, iChapNumber2);
+							Chapter2 = getChapterByNumber(Book2, iChapNumber2, false);
 						}
 					}
 
@@ -334,17 +334,10 @@ public class Librarian {
 						if (vsVerse2 != null) {
 
 							if (!isCheckingVersMap) {
-								sVerseText2 = vsVerse2.getText();
-
-								// speedup (вынос Pattern.compile("\\d") за цикл прироста не дал)
-								Matcher mMatcher = Pattern.compile("\\d").matcher(sVerseText2);
-
-								if (mMatcher.find()) {
-
-									// speedup (StringBuilder вместо "+" прироста скорости не дал)
-									sVerseText2 = sVerseText2.substring(0, mMatcher.start())
-											+ sModuleShortNameWithDot + sChapNumber2 + "." + sVerseText2.substring(mMatcher.start());
-								}
+								sVerseText2 = vsVerse2.getText()
+										  .replaceAll("(^|\\n)(<[^/]+?>)*?(\\d+)(</(.)+?>){0,1}?\\s+",
+													 "$1$2" + sModuleShortNameWithDot + sChapNumber2 + "." + "$3$4 ")
+										  .replaceAll("null", "");
 							}
 						} else isVerse2 = false;
 					} else isVerse2 = false;
@@ -352,7 +345,7 @@ public class Librarian {
 
 					if (!isCheckingVersMap) {
 						VerseQueue verseQueue =
-								new VerseQueue(iChapNumber2, (iVsNumber2 - 1), sVerseText2, iSequenceFlags);
+								new VerseQueue(iChapNumber2, iVsNumber2, sVerseText2, iSequenceFlags);
 
 						chapterQueue.offer(verseQueue);
 					}
@@ -516,7 +509,7 @@ public class Librarian {
 
 					for (int iCh = 1; iCh <= Book1.chapterQty; iCh++) {
 						if (Thread.interrupted()) return;
-						arlEtalonChapters.add(getEtalonChapter(getChapterByNumber(Book1, iCh), Module1.getVersificationMap()));
+						arlEtalonChapters.add(getEtalonChapter(getChapterByNumber(Book1, iCh, false), Module1.getVersificationMap()));
 					}
 
 
@@ -594,7 +587,7 @@ public class Librarian {
 
 					for (int iCh = 1; iCh <= Book2.chapterQty; iCh++) {
 						if (Thread.interrupted()) return;
-						arlEtalonChapters.add(getEtalonChapter(getChapterByNumber(Book2, iCh), Module2.getVersificationMap()));
+						arlEtalonChapters.add(getEtalonChapter(getChapterByNumber(Book2, iCh, false), Module2.getVersificationMap()));
 					}
 
 

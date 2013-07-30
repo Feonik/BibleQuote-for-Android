@@ -216,7 +216,7 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 	}
 
 	private void reloadChapterFromLink(BibleReference osisLink) {
-		mTask = new AsyncOpenChapter(progressMessage, false, myLibrarian, osisLink, true);
+		mTask = new AsyncOpenChapter(progressMessage, false, myLibrarian, osisLink, null, true);
 		mAsyncManager.setupTask(mTask, this);
 	}
 
@@ -229,7 +229,7 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 	}
 
 	private void openParChapterByModuleID(String ParModuleID) {
-		mTask = new AsyncOpenChapter(progressMessage, false, myLibrarian, null, ParModuleID);
+		mTask = new AsyncOpenChapter(progressMessage, false, myLibrarian, null, ParModuleID, false);
 		mAsyncManager.setupTask(mTask, this);
 	}
 

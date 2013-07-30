@@ -182,7 +182,7 @@ public class FsChapterController implements IChapterController {
 
 
 								int iChapterNumber = verseQueue.getChapter();
-								int iVerseNumber = verseQueue.getNumber() + 1;
+								int iVerseNumber = verseQueue.getNumber();
 
 								String verseText = verseQueue.getText();
 
@@ -211,8 +211,8 @@ public class FsChapterController implements IChapterController {
 									*/
 
 									verseText = verseText
-											  .replaceAll("^(<[^/]+?>)*?([\\w\\-\\+]+?[.])*?(\\d+.\\d+)(</(.)+?>){0,1}?\\s+",
-														 "$1<b>$2$3</b>$4 ").replaceAll(
+											  .replaceAll("(^|\\n)(<[^/]+?>)*?([\\w\\-\\+]+?[.])*?(\\d+.\\d+)(</(.)+?>){0,1}?\\s+",
+														 "$1$2<b>$3$4</b>$5 ").replaceAll(
 														 "null", "").replaceAll("([>\\s]\\b)([\\p{L}]+?)(\\b)",
 														 "$1<span>$2</span>$3");
 
