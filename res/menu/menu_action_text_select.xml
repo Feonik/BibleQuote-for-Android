@@ -42,4 +42,10 @@
 			android:orderInCategory="2"
 			android:icon="@drawable/ic_action_mode_copy"
 			android:showAsAction="ifRoom|withText"/>
+	<!-- TODO добавить иконку, упорядочить -->
+	<item
+			android:title="@string/verseeditor_edit_verses"
+			android:id="@+id/action_verseeditor"
+			android:orderInCategory="3"
+			android:showAsAction="ifRoom|withText"/>
 </menu>

@@ -30,6 +30,18 @@ public class Chapter {
 		return text;
 	}
 
+	public String getTextLn() {
+		String sText = "";
+		if (verses.size() > 0) {
+			StringBuilder buffer = new StringBuilder();
+			for (Integer verseNumber : verses.keySet()) {
+				buffer.append(verses.get(verseNumber).getText()).append(String.format("%n"));
+			}
+			sText = buffer.toString();
+		}
+		return (sText.length() == 0) ? String.format("%n") : sText;
+	}
+
 	public String getText(int fromVerse, int toVerse) {
 		StringBuilder buffer = new StringBuilder();
 		for (int verseNumber = fromVerse; verseNumber <= toVerse; verseNumber++) {
@@ -94,5 +106,9 @@ public class Chapter {
 
 	public Verse getVerse(int verseNumber) {
 		return verses.get(verseNumber);
+	}
+
+	public Verse putVerse(Integer verseNumber, Verse verse) {
+		return verses.put(verseNumber, verse);
 	}
 }

@@ -15,6 +15,8 @@ public interface IChapterRepository<TBook> {
 
 	Chapter loadChapter(TBook book, Integer chapterNumber) throws BookNotFoundException;
 
+	boolean saveChapter(Chapter chapter);
+
 	void insertChapter(Chapter chapter);
 
 	void deleteChapter(Chapter chapter);

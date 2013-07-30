@@ -15,13 +15,15 @@ public class AsyncOpenChapter extends Task {
 	private String ParModuleID;
 	private Exception exception;
 	private Boolean isSuccess;
+	private Boolean isReload;
 
 	public AsyncOpenChapter(String message, Boolean isHidden, Librarian librarian, BibleReference link,
-							String ParModuleID) {
+							String ParModuleID, Boolean isReload) {
 		super(message, isHidden);
 		this.librarian = librarian;
 		this.link = link;
 		this.ParModuleID = ParModuleID;
+		this.isReload = isReload;
 	}
 
 	@Override
@@ -32,7 +34,7 @@ public class AsyncOpenChapter extends Task {
 				Log.i(TAG, String.format("Open OSIS link with moduleID=%1$s, bookID=%2$s, chapterNumber=%3$s, verseNumber=%4$s",
 						link.getModuleID(), link.getBookID(), link.getChapter(), link.getFromVerse()));
 
-				librarian.openChapter(link);
+				librarian.openChapter(link, isReload);
 			} else if (ParModuleID != null) {
 				Log.i(TAG, String.format("Open ParChapter by moduleID=%1$s", ParModuleID));
 

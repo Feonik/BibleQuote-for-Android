@@ -37,10 +37,12 @@ import com.BibleQuote.BibleQuoteApp;
 import com.BibleQuote.R;
 import com.BibleQuote.async.AsyncManager;
 import com.BibleQuote.async.AsyncOpenChapter;
+import com.BibleQuote.async.AsyncSaveChapter;
 import com.BibleQuote.entity.BibleReference;
 import com.BibleQuote.exceptions.BookNotFoundException;
 import com.BibleQuote.exceptions.ExceptionHelper;
 import com.BibleQuote.exceptions.OpenModuleException;
+import com.BibleQuote.modules.Chapter;
 import com.BibleQuote.ui.fragments.TTSPlayerFragment;
 import com.BibleQuote.listeners.IReaderViewListener;
 import com.BibleQuote.managers.Librarian;
@@ -140,6 +142,10 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 					startActivityForResult(intParallels, ID_PARALLELS);
 					break;
 
+				case R.id.action_verseeditor:
+					vWeb.versesEditor();
+					break;
+
 				default:
 					return false;
 			}
@@ -157,6 +163,17 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// For javascript debug
+		/*final Thread.UncaughtExceptionHandler subclass = Thread.currentThread().getUncaughtExceptionHandler();
+		Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+			@Override
+			public void uncaughtException(Thread paramThread, Throwable paramThrowable) {
+				Log.e(TAG, "uncaughtException", paramThrowable);
+				subclass.uncaughtException(paramThread, paramThrowable);
+			}
+		});*/
+
 		BibleQuoteApp app = (BibleQuoteApp) getApplication();
 
 		if (app.isServiceRunning()) {
@@ -194,7 +211,20 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 
 
 	private void openChapterFromLink(BibleReference osisLink) {
-		mTask = new AsyncOpenChapter(progressMessage, false, myLibrarian, osisLink, null);
+		mTask = new AsyncOpenChapter(progressMessage, false, myLibrarian, osisLink, null, false);
+		mAsyncManager.setupTask(mTask, this);
+	}
+
+	private void reloadChapterFromLink(BibleReference osisLink) {
+		mTask = new AsyncOpenChapter(progressMessage, false, myLibrarian, osisLink, true);
+		mAsyncManager.setupTask(mTask, this);
+	}
+
+	private void saveChapter(Chapter chapter) {
+
+		// TODO заменить сообщение "Загрузка..." на "Сохранение..."
+
+		mTask = new AsyncSaveChapter(progressMessage, false, myLibrarian, chapter);
 		mAsyncManager.setupTask(mTask, this);
 	}
 
@@ -250,6 +280,7 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 		vWeb = (ReaderWebView) findViewById(R.id.readerView);
 		vWeb.setOnReaderViewListener(this);
 		vWeb.setMode(PreferenceHelper.isReadModeByDefault() ? ReaderWebView.Mode.Read : ReaderWebView.Mode.Study);
+		vWeb.setLibrarian(myLibrarian);
 	}
 
 	@Override
@@ -321,6 +352,12 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 			case R.id.About:
 				Intent intentAbout = new Intent().setClass(getApplicationContext(), AboutActivity.class);
 				startActivity(intentAbout);
+				break;
+			case R.id.action_verseeditor_save_chapter:
+				saveCurrentChapter();
+				break;
+			case R.id.action_verseeditor_reload_chapter:
+				reloadCurrentChapter();
 				break;
 			default:
 				return false;
@@ -444,6 +481,19 @@ public class ReaderActivity extends SherlockFragmentActivity implements OnTaskCo
 
 	private void viewCurrentChapter() {
 		openChapterFromLink(myLibrarian.getCurrentOSISLink());
+	}
+
+	private void reloadCurrentChapter() {
+		vWeb.resetFixedVerses();
+		reloadChapterFromLink(myLibrarian.getCurrentOSISLink());
+	}
+
+	// TODO при переходе на другую главу спросить о сохранении главы
+	private void saveCurrentChapter() {
+		if (vWeb.isChapterChanged()) {
+			vWeb.resetFixedVerses();
+			saveChapter(myLibrarian.getCurrChapter());
+		}
 	}
 
 	public void viewChapterNav() {

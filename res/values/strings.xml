@@ -74,7 +74,9 @@
 	<string name="menu_partranslates">Parallel Translates</string>
 	<string name="menu_partranslates_switch">Translates On/Off</string>
 	<string name="menu_partranslates_checkversmap">Check of Versification Map</string>
-	<!-- Dialogs -->
+	<string name="menu_save_chapter">Save chapter</string>
+	<string name="menu_reload_chapter">Reload chapter</string>
+    <!-- Dialogs -->
     <string name="find">Find</string>
     <string name="menu">Menu</string>
     <string name="cancel">Cancel</string>
@@ -100,6 +102,9 @@
     <string name="dialog_color_picker">Choose a color</string>
     <string name="press_color_to_apply">Press to apply</string>
     <string name="references">References</string>
+	<string name="verseeditor_edit_verses">Edit Verses</string>
+	<string name="verseeditor_fix_verse">Fix verse</string>
+	<string name="verseeditor_cancel_edit_verse">Cancel</string>
     <!-- Exceptions -->
     <string name="exception_book_definition">Incorrect attributes of book #%1$s in module %2$s: PathName=%3$s, FullName=%4$s, ShortName=%5$s, ChapterQty=%6$s</string>
     <string name="exception_book_not_found">Book %1$s not found in module %2$s</string>

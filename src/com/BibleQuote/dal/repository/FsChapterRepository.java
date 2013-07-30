@@ -85,6 +85,11 @@ public class FsChapterRepository implements IChapterRepository<FsBook> {
 	}
 
 
+	public boolean saveChapter(Chapter chapter) {
+		return context.saveChapter(chapter);
+	}
+
+
 	public void insertChapter(Chapter chapter) {
 	}
 

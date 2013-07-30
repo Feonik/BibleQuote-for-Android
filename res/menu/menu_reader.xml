@@ -86,5 +86,16 @@
 		android:id="@+id/About"
 		android:orderInCategory="11"
 		android:icon="@drawable/ic_action_about"
-		android:showAsAction="ifRoom" />
+		android:showAsAction="ifRoom"/>
+	<!-- TODO упорядочить, добавить иконки -->
+	<item
+		android:title="@string/menu_save_chapter"
+		android:id="@+id/action_verseeditor_save_chapter"
+		android:orderInCategory="8"
+		android:showAsAction="ifRoom"/>
+	<item
+		android:title="@string/menu_reload_chapter"
+		android:id="@+id/action_verseeditor_reload_chapter"
+		android:orderInCategory="9"
+		android:showAsAction="ifRoom"/>
 </menu>

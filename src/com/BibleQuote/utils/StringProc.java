@@ -17,7 +17,11 @@ public class StringProc {
 	}
 
 	public static String cleanStrongNumbers(String verse) {
-		return verse.replaceAll("\\s\\d+", "");
+		return verse.replaceAll("[ \\t\\x0B\\f\\r]\\d+", "");
+	}
+
+	public static String cleanHeads(String verse) {
+		return verse.replaceAll("^.*\\n1", "").replaceAll("\\n.*", "");
 	}
 
 	public static String cleanVerseNumbers(String verse) {
@@ -25,8 +29,7 @@ public class StringProc {
 	}
 
 	public static String cleanVerseText(String verse) {
-		return cleanStrongNumbers(cleanVerseNumbers(stripTags(verse)));
-
+		return cleanStrongNumbers(cleanHeads(cleanVerseNumbers(stripTags(verse))));
 	}
 
 
