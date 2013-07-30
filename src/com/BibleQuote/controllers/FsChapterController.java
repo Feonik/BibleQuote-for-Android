@@ -100,11 +100,9 @@ public class FsChapterController implements IChapterController {
 		sVerseText = sVerseText.replaceAll("<a\\s+?href=\"verse\\s\\d+?\">(\\d+?)</a>", "<b>$1</b>");
 
 		if (module.isBible) {
-			// TODO если перед 1-м стихом есть заголовок, то выделение номера стиха не работает
 			sVerseText = sVerseText
-					  .replaceAll("^(<[^/]+?>)*?(\\d+)(</(.)+?>){0,1}?\\s+",
-								 "$1<b>$2</b>$3 ").replaceAll(
-								 "null", "");
+					  .replaceAll("(^|\\n)(<[^/]+?>)*?(\\d+)(</(.)+?>){0,1}?\\s+", "$1$2<b>$3</b>$4 ")
+					  .replaceAll("null", "");
 		}
 
 		return sVerseText.replaceAll("<(/)*div(.*?)>", "<$1p$2>");

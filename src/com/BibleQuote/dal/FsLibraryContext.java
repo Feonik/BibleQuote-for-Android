@@ -315,7 +315,6 @@ public class FsLibraryContext extends LibraryContext {
 	}
 
 
-	// TODO проверить работу с выделенными стихами в других функциях
 	public Chapter loadChapter(Book book, Integer chapterNumber, BufferedReader bReader) {
 
 		String chapterSign = book.getModule().ChapterSign;
