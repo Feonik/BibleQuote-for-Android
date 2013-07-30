@@ -16,7 +16,7 @@
 
 function selectVerse(id) {
 	element = document.getElementById(id);
-	element.className = "selectedVerse"; 
+	element.className = "selectedVerse";
 }
 
 function deselectVerse(id) {
@@ -42,3 +42,28 @@ function gotoVerse(number) {
     document.location.href='#verse_' + number;
 }
 
+
+function fixVerse(verseNum) {
+	var verse_editor = document.getElementById('v_editor_' + verseNum);
+	reader.fixVerse(verseNum, verse_editor.value);
+}
+
+
+function cancelEdit(verseNum) {
+	reader.cancelEdit(verseNum);
+}
+
+
+function setVerseForEdit(verseNum, VerseText) {
+	var verse = document.getElementById('verse_' + verseNum);
+	verse.id = 'editver_' + verseNum;
+    verse.className = "verse";
+	verse.innerHTML = VerseText;
+	//console.error(document.documentElement.innerHTML);
+}
+
+function setVerseAfterEdit(verseNum, VerseText) {
+	var verse = document.getElementById('editver_' + verseNum);
+    verse.id = 'verse_' + verseNum;
+	verse.innerHTML = VerseText;
+}

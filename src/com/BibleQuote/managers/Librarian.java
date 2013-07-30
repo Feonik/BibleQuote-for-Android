@@ -124,14 +124,14 @@ public class Librarian {
 		return bookCtrl.getBookByID(module, bookID);
 	}
 
-	public Chapter getChapterByNumber(Book book, Integer chapterNumber) throws BookNotFoundException {
-		return chapterCtrl.getChapter(book, chapterNumber);
+	public Chapter getChapterByNumber(Book book, Integer chapterNumber, Boolean isReload) throws BookNotFoundException {
+		return chapterCtrl.getChapter(book, chapterNumber, isReload);
 	}
 
-	public Chapter openChapter(BibleReference link) throws BookNotFoundException, OpenModuleException {
+	public Chapter openChapter(BibleReference link, Boolean isReload) throws BookNotFoundException, OpenModuleException {
 		currModule = getModuleByID(link.getModuleID());
 		currBook = getBookByID(getCurrModule(), link.getBookID());
-		currChapter = getChapterByNumber(getCurrBook(), link.getChapter());
+		currChapter = getChapterByNumber(getCurrBook(), link.getChapter(), isReload);
 		currChapterNumber = link.getChapter();
 		currVerseNumber = link.getFromVerse();
 
@@ -264,6 +264,19 @@ public class Librarian {
 
 	public String getChapterHTMLView() {
 		return chapterCtrl.getChapterHTMLView(getCurrChapter());
+	}
+
+	public String getVerseTextHtmlBody(Module module, String sVerseText) {
+		return chapterCtrl.getVerseTextHtmlBody(module, sVerseText);
+	}
+
+	public Verse fixVerseText(Chapter chapter, Integer iVerseNumber, String sVerseText) {
+		Verse verse = new Verse(iVerseNumber, sVerseText);
+		return chapter.putVerse(iVerseNumber, verse);
+	}
+
+	public void saveChapter(Chapter chapter) {
+		chapterCtrl.saveChapter(chapter);
 	}
 
 	public Boolean isBible() {
@@ -517,7 +530,7 @@ public class Librarian {
 			try {
 				int fromVerse = ref.getFromVerse();
 				int toVerse = ref.getToVerse();
-				Chapter chapter = getChapterByNumber(getBookByID(getCurrModule(), ref.getBookID()), ref.getChapter());
+				Chapter chapter = getChapterByNumber(getBookByID(getCurrModule(), ref.getBookID()), ref.getChapter(), false);
 				crossReferenceContent.put(ref,
 						StringProc.stripTags(chapter.getText(fromVerse, toVerse))
 								.replaceAll("\\s(H|G)*\\d+", "")

@@ -22,9 +22,12 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
+import android.view.View;
 import android.webkit.*;
+import com.BibleQuote.R;
 import com.BibleQuote.listeners.IReaderViewListener;
 import com.BibleQuote.listeners.IReaderViewListener.ChangeCode;
+import com.BibleQuote.managers.Librarian;
 import com.BibleQuote.utils.PreferenceHelper;
 
 import java.util.ArrayList;
@@ -56,6 +59,23 @@ public class ReaderWebView extends WebView
 		jsInterface.gotoVerse(verse);
 	}
 
+	public void versesEditor() {
+		for (Integer verse : selectedVerse) {
+			jsInterface.verseEditor(verse);
+		}
+		selectedVerse.clear();
+	}
+
+	private boolean isChapterChanged = false;
+
+	public boolean isChapterChanged() {
+		return isChapterChanged;
+	}
+
+	public void resetFixedVerses() {
+		isChapterChanged = false;
+	}
+
 	public static enum Mode {
 		Read, Study, Speak
 	}
@@ -72,6 +92,13 @@ public class ReaderWebView extends WebView
 
 	public Mode getMode() {
 		return currMode;
+	}
+
+
+	protected Librarian myLibrarian;
+
+	public void setLibrarian(Librarian librarian) {
+		myLibrarian = librarian;
 	}
 
 	private ArrayList<IReaderViewListener> listeners = new ArrayList<IReaderViewListener>();
@@ -103,6 +130,30 @@ public class ReaderWebView extends WebView
 		setFocusableInTouchMode(true);
 		setWebViewClient(new webClient());
 		setWebChromeClient(new chromeClient());
+
+		// <-- bug -- для вывода виртуальной клавиатуры
+		// http://code.google.com/p/android/issues/detail?id=7189
+		// Issue 7189: 	WebView with input/textarea never get virtual keyboard focus
+		setHapticFeedbackEnabled(true);
+		setClickable(true);
+		requestFocus(View.FOCUS_DOWN);
+		//settings.setUseWideViewPort(true); //-- делает слишком широкой <textarea>
+
+		setOnTouchListener(new View.OnTouchListener() {
+
+			public boolean onTouch(View v, MotionEvent event) {
+				switch (event.getAction()) {
+					case MotionEvent.ACTION_DOWN:
+					case MotionEvent.ACTION_UP:
+						if (!v.hasFocus()) {
+							v.requestFocus();
+						}
+						break;
+				}
+				return false;
+			}
+		});
+		// -->
 
 		this.jsInterface = new JavaScriptInterface();
 		addJavascriptInterface(this.jsInterface, "reader");
@@ -243,10 +294,16 @@ public class ReaderWebView extends WebView
 				y += getScrollY();
 			}
 			float density = getContext().getResources().getDisplayMetrics().density;
-			x = (int) (x / density);
-			y = (int) (y / density);
+			final int x_final = (int) (x / density);
+			final int y_final = (int) (y / density);
 
-			loadUrl("javascript:handleClick(" + x + ", " + y + ");");
+			post(new Runnable() {
+				@Override
+				public void run() {
+					loadUrl("javascript:handleClick(" + x_final + ", " + y_final + ");");
+				}
+			});
+
 			notifyListeners(ChangeCode.onChangeSelection);
 		} else if (currMode == Mode.Read) {
 			int width = this.getWidth();
@@ -318,8 +375,15 @@ public class ReaderWebView extends WebView
 		}
 
 		public void clearSelectedVerse() {
-			for (Integer verse : selectedVerse) {
-				loadUrl("javascript: deselectVerse('verse_" + verse + "');");
+			for (final Integer verse : selectedVerse) {
+
+				post(new Runnable() {
+					@Override
+					public void run() {
+						loadUrl("javascript: deselectVerse('verse_" + verse + "');");
+					}
+				});
+
 			}
 			selectedVerse.clear();
 		}
@@ -329,13 +393,23 @@ public class ReaderWebView extends WebView
 				return;
 			}
 
-			Integer verse = Integer.parseInt(id.split("_")[1]);
-			if (verse == null) {
+			final Integer verse;
+			try{
+				verse = Integer.parseInt(id.split("_")[1]);
+			} catch (NumberFormatException e) {
 				return;
 			}
+
 			if (selectedVerse.contains(verse)) {
 				selectedVerse.remove(verse);
-				loadUrl("javascript: deselectVerse('verse_" + verse + "');");
+
+				post(new Runnable() {
+					@Override
+					public void run() {
+						loadUrl("javascript: deselectVerse('verse_" + verse + "');");
+					}
+				});
+
 			} else {
 				selectedVerse.add(verse);
 				setSelectedVerse(verse);
@@ -353,16 +427,110 @@ public class ReaderWebView extends WebView
 			}
 		}
 
-		private void setSelectedVerse(int verse) {
-			loadUrl("javascript: selectVerse('verse_" + verse + "');");
+		private void setSelectedVerse(final int verse) {
+
+			post(new Runnable() {
+				@Override
+				public void run() {
+					loadUrl("javascript: selectVerse('verse_" + verse + "');");
+				}
+			});
+
 		}
 
-		public void gotoVerse(int verse) {
-			loadUrl("javascript: gotoVerse(" + verse + ");");
+		public void gotoVerse(final int verse) {
+
+			post(new Runnable() {
+				@Override
+				public void run() {
+					loadUrl("javascript: gotoVerse(" + verse + ");");
+				}
+			});
+
 		}
 
 		public void alert(final String message) {
 			Log.i(TAG, "JavaScriptInterface.alert()");
+		}
+
+		public void verseEditor(final int iVerseNumber) {
+
+			if (selectedVerse.contains(iVerseNumber)) {
+
+				String sVerseText = myLibrarian.getCurrChapter().getVerse(iVerseNumber).getText();
+
+				sVerseText = sVerseText.replace(String.format("%n"), "\\n");
+
+				sVerseText = "<form><textarea id='v_editor_"
+						  + iVerseNumber
+						  + "' class='verse_editor' wrap='soft' rows='3'>"
+						  + sVerseText
+						  + "</textarea><button onclick=\"fixVerse('"
+						  + iVerseNumber
+						  + "')\">"
+						  + getContext().getResources().getString(R.string.verseeditor_fix_verse)
+						  + "</button><button onclick=\"cancelEdit('"
+						  + iVerseNumber + "')\">"
+						  + getContext().getResources().getString(R.string.verseeditor_cancel_edit_verse)
+						  + "</button></form>";
+
+				sVerseText = sVerseText.replaceAll("([^\\\\])(')", "$1\\\\$2");
+
+
+				final String sVerseText_final = sVerseText;
+
+				post(new Runnable() {
+					@Override
+					public void run() {
+						loadUrl("javascript: setVerseForEdit('" + iVerseNumber + "', '" + sVerseText_final + "');");
+					}
+				});
+
+			}
+		}
+
+		public void fixVerse(final String sVerseNum, String sVerseText) {
+			Integer iVerseNumber = Integer.parseInt(sVerseNum);
+
+			sVerseText = sVerseText.replace("\n", String.format("%n"));
+
+			myLibrarian.fixVerseText(myLibrarian.getCurrChapter(), iVerseNumber, sVerseText);
+			isChapterChanged = true;
+
+			sVerseText = myLibrarian.getVerseTextHtmlBody(myLibrarian.getCurrModule(), sVerseText)
+					  .replaceAll("([^\\\\])(')", "$1\\\\$2")
+					  .replace(String.format("%n"), "\\n");
+
+			final String sVerseText_final = sVerseText;
+
+			post(new Runnable() {
+				@Override
+				public void run() {
+					loadUrl("javascript: setVerseAfterEdit('" + sVerseNum + "', '" + sVerseText_final + "');");
+				}
+			});
+
+		}
+
+		public void cancelEdit(final String sVerseNum) {
+			Integer iVerseNumber = Integer.parseInt(sVerseNum);
+
+			String sVerseText = myLibrarian.getCurrChapter().getVerse(iVerseNumber).getText();
+
+			sVerseText = myLibrarian.getVerseTextHtmlBody(myLibrarian.getCurrModule(), sVerseText)
+					  .replaceAll("([^\\\\])(')", "$1\\\\$2")
+					  .replace(String.format("%n"), "\\n");
+
+
+			final String sVerseText_final = sVerseText;
+
+			post(new Runnable() {
+				@Override
+				public void run() {
+					loadUrl("javascript: setVerseAfterEdit('" + sVerseNum + "', '" + sVerseText_final + "');");
+				}
+			});
+
 		}
 	}
 }

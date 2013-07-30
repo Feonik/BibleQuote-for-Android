@@ -32,13 +32,25 @@ public class FsChapterController implements IChapterController {
 	}
 
 
-	public Chapter getChapter(Book book, Integer chapterNumber) throws BookNotFoundException {
+	public Chapter getChapter(Book book, Integer chapterNumber, Boolean isReload) throws BookNotFoundException {
 		book = getValidBook(book);
-		Chapter chapter = chRepository.getChapterByNumber((FsBook) book, chapterNumber);
-		if (chapter == null) {
+		Chapter chapter;
+
+		if (isReload) {
 			chapter = chRepository.loadChapter((FsBook) book, chapterNumber);
+		} else {
+			chapter = chRepository.getChapterByNumber((FsBook) book, chapterNumber);
+			if (chapter == null) {
+				chapter = chRepository.loadChapter((FsBook) book, chapterNumber);
+			}
 		}
+
 		return chapter;
+	}
+
+
+	public boolean saveChapter(Chapter chapter) {
+		return chRepository.saveChapter(chapter);
 	}
 
 
@@ -61,30 +73,41 @@ public class FsChapterController implements IChapterController {
 		ArrayList<Verse> verses = chapter.getVerseList();
 		StringBuilder chapterHTML = new StringBuilder();
 		for (int verse = 1; verse <= verses.size(); verse++) {
-			String verseText = verses.get(verse - 1).getText();
-
-			if (currModule.containsStrong) {
-				// убираем номера Стронга
-				verseText = verseText.replaceAll("\\s(\\d)+", "");
-			}
-
-			verseText = StringProc.stripTags(verseText, currModule.HtmlFilter);
-			verseText = verseText.replaceAll("<a\\s+?href=\"verse\\s\\d+?\">(\\d+?)</a>", "<b>$1</b>");
-			if (currModule.isBible) {
-				verseText = verseText
-						.replaceAll("^(<[^/]+?>)*?(\\d+)(</(.)+?>){0,1}?\\s+",
-								"$1<b>$2</b>$3 ").replaceAll(
-								"null", "");
-			}
-
-			chapterHTML.append(
-					"<div id=\"verse_" + verse + "\" class=\"verse\">"
-							+ verseText.replaceAll("<(/)*div(.*?)>", "<$1p$2>")
-							+ "</div>"
-							+ "\r\n");
+			chapterHTML.append("<div id=\"verse_")
+					  .append(verse)
+					  .append("\" class=\"verse\">")
+					  .append(getVerseTextHtmlBody(currModule, verses.get(verse - 1).getText()))
+					  .append("</div>")
+					  .append("\r\n");
 		}
 
 		return chapterHTML.toString();
+	}
+
+
+	public String getVerseTextHtmlBody(Module module, String sVerseText) {
+
+		if (module == null || sVerseText == null || sVerseText.length() == 0) {
+			return "";
+		}
+
+		if (module.containsStrong) {
+			// убираем номера Стронга
+			sVerseText = sVerseText.replaceAll("\\s(\\d)+", "");
+		}
+
+		sVerseText = StringProc.stripTags(sVerseText, module.HtmlFilter);
+		sVerseText = sVerseText.replaceAll("<a\\s+?href=\"verse\\s\\d+?\">(\\d+?)</a>", "<b>$1</b>");
+
+		if (module.isBible) {
+			// TODO если перед 1-м стихом есть заголовок, то выделение номера стиха не работает
+			sVerseText = sVerseText
+					  .replaceAll("^(<[^/]+?>)*?(\\d+)(</(.)+?>){0,1}?\\s+",
+								 "$1<b>$2</b>$3 ").replaceAll(
+								 "null", "");
+		}
+
+		return sVerseText.replaceAll("<(/)*div(.*?)>", "<$1p$2>");
 	}
 
 

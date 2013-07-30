@@ -27,10 +27,7 @@ import com.BibleQuote.utils.FsUtils;
 import com.BibleQuote.utils.StringProc;
 import com.BibleQuote.utils.modules.LanguageConvertor;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -318,17 +315,33 @@ public class FsLibraryContext extends LibraryContext {
 	}
 
 
+	// TODO проверить работу с выделенными стихами в других функциях
 	public Chapter loadChapter(Book book, Integer chapterNumber, BufferedReader bReader) {
 
+		String chapterSign = book.getModule().ChapterSign;
 		ArrayList<String> lines = new ArrayList<String>();
 		try {
 			String str;
 			int currentChapter = book.getModule().ChapterZero ? 0 : 1;
-			String chapterSign = book.getModule().ChapterSign;
+
 			boolean chapterFind = false;
+
 			while ((str = bReader.readLine()) != null) {
+
 				if (str.toLowerCase().contains(chapterSign)) {
-					if (chapterFind) {
+
+					if (currentChapter++ == chapterNumber) {
+						// начало главы
+						chapterFind = true;
+
+						// Тег начала главы может быть не вначале строки.
+						// Обрежем все, что есть до теги начала главы и добавим
+						// к найденным строкам
+						str = str.substring(str.toLowerCase().indexOf(chapterSign));
+						lines.add(str);
+
+					} else if (chapterFind) {
+						// конец главы
 						// Тег начала главы может быть не вначале строки.
 						// Возьмем то, что есть до теги начала главы и добавим
 						// к найденным строкам
@@ -337,20 +350,13 @@ public class FsLibraryContext extends LibraryContext {
 							lines.add(str);
 						}
 						break;
-					} else if (currentChapter++ == chapterNumber) {
-						chapterFind = true;
-						// Тег начала главы может быть не вначале строки.
-						// Обрежем все, что есть до теги начала главы и добавим
-						// к найденным строкам
-						str = str.substring(str.toLowerCase().indexOf(chapterSign));
 					}
+				} else if (chapterFind) {
+					lines.add(str);
 				}
-				if (!chapterFind) {
-					continue;
-				}
-
-				lines.add(str);
 			}
+
+
 		} catch (IOException e) {
 			Log.e(TAG, String.format("loadChapter(%1$s, %2$s)", book.getID(), chapterNumber), e);
 			return null;
@@ -358,17 +364,129 @@ public class FsLibraryContext extends LibraryContext {
 
 		ArrayList<Verse> verseList = new ArrayList<Verse>();
 		String verseSign = book.getModule().VerseSign;
-		int i = -1;
+		int i = 0;
+		boolean is1stVerseWorked = false;
+		boolean isChapterSignWorked = false;
+
 		for (String currLine : lines) {
+
+			if (!isChapterSignWorked && currLine.toLowerCase().contains(chapterSign)) {
+				isChapterSignWorked = true;
+				continue;
+			}
+
 			if (currLine.toLowerCase().contains(verseSign)) {
+				if (is1stVerseWorked && verseList.size() > 0) {
+					i++;
+					verseList.add(new Verse(i, currLine));
+				} else if (!is1stVerseWorked && verseList.size() == 0) {
+					i++;
+					verseList.add(new Verse(i, currLine));
+					is1stVerseWorked = true;
+				} else if (!is1stVerseWorked && verseList.size() > 0) {
+					verseList.set(i - 1, new Verse(i, verseList.get(i - 1).getText()
+							  + String.format("%n")
+							  + currLine));
+					is1stVerseWorked = true;
+				}
+
+			} else if (verseList.size() == 0) {
 				i++;
 				verseList.add(new Verse(i, currLine));
 			} else if (verseList.size() > 0) {
-				verseList.set(i, new Verse(i, verseList.get(i).getText() + " " + currLine));
+				verseList.set(i - 1, new Verse(i, verseList.get(i - 1).getText()
+						  + String.format("%n")
+						  + currLine));
 			}
 		}
 
 		return new Chapter(book, chapterNumber, verseList);
+	}
+
+
+	public boolean saveChapter(Chapter chapter) {
+		// TODO создать и обработать исключения
+
+		int iChapterNumber = chapter.getNumber();
+
+		Book book = chapter.getBook();
+
+		// TODO если архив -- вывод предупреждения о невозможности работы
+		FsModule fsModule = (FsModule) book.getModule();
+		if (fsModule.isArchive) {
+			return false;
+		}
+
+		String sFilePath = fsModule.modulePath + File.separator + ((FsBook) book).FileName;
+
+		File inFile = new File(sFilePath);
+		File outFile = new File(sFilePath + ".tmp");
+
+
+		try {
+			BufferedReader inReader = new BufferedReader(new InputStreamReader(new FileInputStream(inFile)));
+			PrintWriter outWriter = new PrintWriter(new FileOutputStream(outFile));
+
+
+			String str;
+			int iCurrChapterNumber = book.getModule().ChapterZero ? 0 : 1;
+			String sChapterSign = book.getModule().ChapterSign;
+
+			boolean isChapterForSave = false;
+
+			while ((str = inReader.readLine()) != null) {
+
+				if (str.toLowerCase().contains(sChapterSign)) {
+
+					if (iCurrChapterNumber++ == iChapterNumber) {
+						// начало главы
+						isChapterForSave = true;
+
+						// Тег начала главы может быть не вначале строки.
+						// Возьмем все, что есть до теги начала главы,
+						// и запишем в файл
+						String str2 = str.substring(0, str.toLowerCase().indexOf(sChapterSign));
+						if (str2.trim().length() > 0) {
+							outWriter.println(str2);
+						}
+
+						// Также запишем в файл тегу начала перезаписываемой главы
+						// и саму новую главу
+						str = str.substring(str.toLowerCase().indexOf(sChapterSign));
+						outWriter.println(str);
+						outWriter.print(chapter.getTextLn());
+
+					} else if (isChapterForSave) {
+						// конец главы
+						isChapterForSave = false;
+
+						// Тег начала главы может быть не вначале строки.
+						// Обрежем все, что есть до теги начала главы,
+						// и запишем в файл оставшееся
+						str = str.substring(str.toLowerCase().indexOf(sChapterSign));
+						outWriter.println(str);
+
+					} else if (!isChapterForSave) {
+						outWriter.println(str);
+					}
+
+				} else if (!isChapterForSave) {
+					outWriter.println(str);
+				}
+			}
+
+
+			outWriter.flush();
+			outWriter.close();
+			inReader.close();
+
+			return inFile.delete() && outFile.renameTo(inFile);
+
+		} catch (IOException e) {
+			e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+
+			return false;
+		}
 	}
 
 

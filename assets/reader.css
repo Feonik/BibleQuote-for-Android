@@ -1,0 +1,7 @@
+
+.verse_editor {
+	overflow: auto; /* полосы прокрутки не появляются, перемещение только через клавиатуру */
+	width: 100%;
+	/*height: auto; -- на весь стих не растягивает*/
+	border: solid 1px black;
+}
