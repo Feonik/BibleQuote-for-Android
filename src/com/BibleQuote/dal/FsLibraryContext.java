@@ -423,8 +423,8 @@ public class FsLibraryContext extends LibraryContext {
 
 
 		try {
-			BufferedReader inReader = new BufferedReader(new InputStreamReader(new FileInputStream(inFile)));
-			PrintWriter outWriter = new PrintWriter(new FileOutputStream(outFile));
+			BufferedReader inReader = new BufferedReader(new InputStreamReader(new FileInputStream(inFile), fsModule.defaultEncoding));
+			PrintWriter outWriter = new PrintWriter(outFile, fsModule.defaultEncoding);
 
 
 			String str;
