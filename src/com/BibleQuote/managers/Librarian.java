@@ -356,7 +356,6 @@ public class Librarian {
 													 "$1$2" + sModuleShortNameWithDot + sChapNumber2 + "." + "$3$4 ")
 										  .replaceAll("null", "");
 							}
-						}
 					} else isVerse2 = false;
 				} else isVerse2 = false;
 
