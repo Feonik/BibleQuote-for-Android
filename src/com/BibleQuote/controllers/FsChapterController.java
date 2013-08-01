@@ -49,6 +49,13 @@ public class FsChapterController implements IChapterController {
 	}
 
 
+	public ArrayList<Chapter> getAllChapters(Book book) throws BookNotFoundException {
+		book = getValidBook(book);
+		ArrayList<Chapter> ChapterList = chRepository.loadAllChapters((FsBook) book);
+		return ChapterList;
+	}
+
+
 	public boolean saveChapter(Chapter chapter) {
 		return chRepository.saveChapter(chapter);
 	}

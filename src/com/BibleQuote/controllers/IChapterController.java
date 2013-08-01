@@ -16,6 +16,8 @@ public interface IChapterController {
 
 	public boolean saveChapter(Chapter chapter);
 
+	public ArrayList<Chapter> getAllChapters(Book book) throws BookNotFoundException;
+
 	public ArrayList<Integer> getVerseNumbers(Book book, Integer chapterNumber) throws BookNotFoundException;
 
 	public String getChapterHTMLView(Chapter chapter);
