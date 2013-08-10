@@ -39,7 +39,8 @@ public final class NumberChoiseView extends DialogPreference implements
 
 	// Default values for defaults
 	private static final int DEFAULT_CURRENT_VALUE = 12;
-	private static final int DEFAULT_MIN_VALUE = 9;
+//	private static final int DEFAULT_MIN_VALUE = 9;
+	private static final int DEFAULT_MIN_VALUE = 1;
 	private static final int DEFAULT_MAX_VALUE = 36;
 
 	// Real defaults
