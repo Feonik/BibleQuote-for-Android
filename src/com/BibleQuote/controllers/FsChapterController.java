@@ -108,16 +108,8 @@ public class FsChapterController implements IChapterController {
 		sVerseText = StringProc.stripTags(sVerseText, module.HtmlFilter);
 		sVerseText = sVerseText.replaceAll("<a\\s+?href=\"verse\\s\\d+?\">(\\d+?)</a>", "<b>$1</b>");
 
-//		if (module.isBible) {
-//			sVerseText = sVerseText
-//					  .replaceAll("(^|\\n)(<[^/]+?>)*?(\\d+)(</(.)+?>){0,1}?\\s+", "$1$2<b>$3</b>$4 ")
-//					  .replaceAll("null", "");
-//		}
-
 
 		StringBuilder sbNewVerseText = new StringBuilder();
-
-		//sVerseText = "<h4><i>« ••• »</i></h4>\n<p><cite style='display: inline-block; vertical-align: top; font-style: normal; padding: 0.25em 0.25em'><br>1</cite> <cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>⌐προσέχετε¬<br>Смотрите,<br>vdpa2p<br>4337</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>τὴν<br><br>dafs<br>3588</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>⌐ἐλεηµοσύνην¬<br>милостыни<br>nafs<br>1654</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>ὑµῶν<br>вашей<br>rpg-p<br>5216</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>µὴ<br>не<br>xo<br>3361</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>ποιεῖν<br>творите<br>vnpa<br>4160</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>ἔµπροσθεν<br>в присутствии<br>adv<br>1715</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>τῶν<br><br>dgmp<br>3588</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>ἀνθρώπων<br>людей<br>ngmp<br>444</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>πρὸς<br>для<br>p<br>4314</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>τὸ<br><br>dans<br>3588</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>ϑεαθῆναι<br>рассматривания<br>vnap<br>2300</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>αὐτοῖς<br>ими,<br>rpdmp<br>846</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>⌐εἰ δὲ µήγε¬<br>иначе<br>qo+x+xo<br>1490</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>µισθὸν<br>награды<br>nams<br>3408</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>οὐκ<br>не<br>xo<br>3756</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>ἔχετε<br>будете иметь<br>vipa2p<br>2192</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>παρὰ<br>перед<br>p<br>3844</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>τῷ<br><br>ddms<br>3588</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>πατρὶ<br>Отцом<br>ndms<br>3962</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>ὑµῶν<br>вашим<br>rpg-p<br>5216</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>τῷ<br><br>ddms<br>3588</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>ἐν<br>на<br>p<br>1722</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>τοῖς<br><br>ddmp<br>3588</cite><cite style='display: inline-block; vertical-align: text-bottom; font-style: normal; padding: 0.25em 0.25em'>οὐρανοῖς<br>Небесах.<br>ndmp<br>3772</cite>";
 
 		if (module.isBible) {
 
@@ -315,30 +307,6 @@ public class FsChapterController implements IChapterController {
 
 								verseText = StringProc.stripTags(verseText, module.HtmlFilter);
 								verseText = verseText.replaceAll("<a\\s+?href=\"verse\\s\\d+?\">(\\d+?)</a>", "<b>$1</b>");
-
-//								if (module.isBible) {
-//									/*
-//									if (iChQ == 0) {
-//										verseText = verseText
-//												.replaceAll("^(<[^/]+?>)*?(\\d+)(</(.)+?>){0,1}?\\s+",
-//														"$1<b>$2</b>$3 ").replaceAll(
-//														"null", "");
-//									} else {
-//										verseText = verseText
-//												.replaceAll("^(<[^/]+?>)*?(\\d+:\\d+)(</(.)+?>){0,1}?\\s+",
-//														"$1<b>$2</b>$3 ").replaceAll(
-//														"null", "");
-//
-//									}
-//									*/
-//
-//									verseText = verseText
-//											  .replaceAll("(^|\\n)(<[^/]+?>)*?([\\w\\-\\+]+?[.])*?(\\d+.\\d+)(</(.)+?>){0,1}?\\s+",
-//														 "$1$2<b>$3$4</b>$5 ").replaceAll(
-//														 "null", "").replaceAll("([>\\s]\\b)([\\p{L}]+?)(\\b)",
-//														 "$1<span>$2</span>$3");
-//
-//								}
 
 
 								StringBuilder sbNewVerseText = new StringBuilder();
