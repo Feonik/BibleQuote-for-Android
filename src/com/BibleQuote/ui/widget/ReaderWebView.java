@@ -496,7 +496,22 @@ public class ReaderWebView extends WebView
 				x = (int) (x / density);
 				y = (int) (y / density);
 
-				loadUrl("javascript:dblClickWord(" + x + ", " + y + ");");
+
+			if (DeviceInfo.isEInkSonyPRST()) {
+
+				Handler handler = new Handler();
+				handler.postDelayed(new Runnable() {
+					public void run() {
+
+						if ((System.currentTimeMillis() - lDownTime) > 10) {
+							mUpdateMode = 34;
+							invalidate();
+						}
+					}
+				}, 10);
+			}
+
+			loadUrl("javascript:dblClickWord(" + x + ", " + y + ");");
 //			} else if (currMode == Mode.Read) {
 
 		}
