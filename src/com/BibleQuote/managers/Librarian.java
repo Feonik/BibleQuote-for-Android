@@ -352,8 +352,8 @@ public class Librarian {
 
 							if (!isCheckingVersMap) {
 								sVerseText2 = vsVerse2.getText()
-										  .replaceAll("(^|\\n)(<[^/]+?>)*?(\\d+)(</(.)+?>){0,1}?\\s+",
-													 "$1$2" + sModuleShortNameWithDot + sChapNumber2 + "." + "$3$4 ")
+										  .replaceAll("((^|\\n)(<[^/]+?>)*?)(\\d+)(</(.)+?>){0,1}?\\s+",
+													 "$1" + sModuleShortNameWithDot + sChapNumber2 + "." + "$4$5 ")
 										  .replaceAll("null", "");
 							}
 					} else isVerse2 = false;
