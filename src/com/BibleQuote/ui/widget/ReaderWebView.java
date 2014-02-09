@@ -330,6 +330,8 @@ public class ReaderWebView extends WebView
 		style.append("img {\r\n");
 		style.append("max-width: 100%;\r\n");
 		style.append("}\r\n");
+		style.append(myLibrarian.getCurrModule().getStyleCss());
+		style.append("\r\n");
 		style.append("</style>\r\n");
 
 		return style.toString();

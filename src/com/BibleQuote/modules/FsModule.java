@@ -34,6 +34,7 @@ public class FsModule extends Module {
 	 */
 	public final String modulePath;
 	public final String versificationFileName;
+	public final String stylesCssFileName;
 
 	/**
 	 * Имя ini-файла (раскладка в названии файла может быть произвольной)
@@ -42,19 +43,35 @@ public class FsModule extends Module {
 
 	public final Boolean isArchive;
 
+
 	public FsModule(String iniFilePath) {
+
 		modulePath = iniFilePath.substring(0, iniFilePath.lastIndexOf(File.separator));
 		iniFileName = iniFilePath.substring(iniFilePath.lastIndexOf(File.separator) + 1);
 		isArchive = modulePath.toLowerCase().endsWith(".zip");
 
 
-		// Таблица версификации должна быть в корне модуля (там же, где и bibleqt.ini) с именем файла "versmap*.xml",
+		// Таблица версификации должна быть в корне модуля
+		// (там же, где и bibleqt.ini) с именем файла "versmap*.xml",
 		// такой файл должен быть только один.
+
+		// Файл с описанием стилей должен быть в корне модуля
+		// (там же, где и bibleqt.ini) с именем файла "styles*.css",
+		// такой файл должен быть только один.
+
+		final String sVersMapNameStart = "versmap";
+		final String sVersMapNameEnd = ".xml";
+
+		final String sStylesCssNameStart = "styles";
+		final String sStylesCssNameEnd = ".css";
 
 		if (isArchive) {
 
 			boolean isZipVersMap = false;
 			String sZipVersMapName = null;
+
+			boolean isZipStylesCss = false;
+			String sZipStylesCssName = null;
 
 			File zipFile = new File(modulePath);
 			try {
@@ -64,12 +81,15 @@ public class FsModule extends Module {
 				while ((entry = zStream.getNextEntry()) != null) {
 					String entryName = entry.getName().toLowerCase();
 
-					// файл "versmap*.xml" должен быть только там же, где и bibleqt.ini
 					//if (entryName.contains(File.separator)) {
 					//	entryName = entryName.substring(entryName.lastIndexOf(File.separator) + 1);
 					//}
 
-					if (entryName.startsWith("versmap") && entryName.endsWith(".xml")) {
+					// файл "versmap*.xml" должен быть только там же,
+					// где и bibleqt.ini
+					if (entryName.startsWith(sVersMapNameStart)
+							&& entryName.endsWith(sVersMapNameEnd)) {
+
 						isZipVersMap = !isZipVersMap;
 
 						// файл "versmap*.xml" должен быть только один
@@ -79,15 +99,34 @@ public class FsModule extends Module {
 
 						sZipVersMapName = entryName;
 					}
+
+					// файл "styles*.css" должен быть только там же,
+					// где и bibleqt.ini
+					if (entryName.startsWith(sStylesCssNameStart)
+							&& entryName.endsWith(sStylesCssNameEnd)) {
+
+						isZipVersMap = !isZipVersMap;
+
+						// файл "styles*.css" должен быть только один
+						if (!isZipStylesCss) {
+							break;
+						}
+
+						sZipStylesCssName = entryName;
+					}
 				}
 
 			} catch (FileNotFoundException e) {
+				// TODO разделить обработку для styles и versmap
 				isZipVersMap = false;
+				isZipStylesCss = false;
 
 				// TODO заменить e.printStackTrace()
 				//e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
 			} catch (IOException e) {
+				// TODO разделить обработку для styles и versmap
 				isZipVersMap = false;
+				isZipStylesCss = false;
 
 				// TODO заменить e.printStackTrace()
 				//e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -101,24 +140,52 @@ public class FsModule extends Module {
 			}
 
 
-		} else { //  !isArchive
+			if (isZipStylesCss) {
+				stylesCssFileName = sZipStylesCssName;
+			} else {
+				stylesCssFileName = null;
+			}
+
+		} else { //  if (!isArchive)
+
+			File dirModule = new File(modulePath);
+
 
 			FilenameFilter fnfVersMap = new FilenameFilter() {
-				@Override
 				public boolean accept(File dir, String name) {
 					name = name.toLowerCase();
-					return name.startsWith("versmap") && name.endsWith(".xml");
+
+					return name.startsWith(sVersMapNameStart)
+							&& name.endsWith(sVersMapNameEnd);
 				}
 			};
 
-			File dirModule = new File(modulePath);
-			String[] saModuleFileNames = dirModule.list(fnfVersMap);
+			String[] saVersMapFileNames = dirModule.list(fnfVersMap);
 
 			// файл "versmap*.xml" должен быть только один
-			if (saModuleFileNames.length == 1) {
-				versificationFileName = saModuleFileNames[0];
+			if (saVersMapFileNames.length == 1) {
+				versificationFileName = saVersMapFileNames[0];
 			} else {
 				versificationFileName = null;
+			}
+
+
+			FilenameFilter fnfStylesCss = new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					name = name.toLowerCase();
+
+					return name.startsWith(sStylesCssNameStart)
+							&& name.endsWith(sStylesCssNameEnd);
+				}
+			};
+
+			String[] saStylesCssFileNames = dirModule.list(fnfStylesCss);
+
+			// файл "styles*.css" должен быть только один
+			if (saStylesCssFileNames.length == 1) {
+				stylesCssFileName = saStylesCssFileNames[0];
+			} else {
+				stylesCssFileName = null;
 			}
 		}
 
@@ -174,4 +241,65 @@ public class FsModule extends Module {
 		return versificationMap;
 	}
 
+
+	@Override
+	public String getStyleCss() {
+
+		if (styleCss == null) {
+
+			BufferedReader brStyleCssFile = null;
+
+			if (stylesCssFileName != null) {
+				try {
+
+					if (isArchive) {
+
+						brStyleCssFile = FsUtils.getTextFileReaderFromZipArchive(
+								modulePath, stylesCssFileName, "UTF-8");
+
+					} else {
+
+						brStyleCssFile = new BufferedReader(new FileReader(modulePath + File.separator
+								+ stylesCssFileName));
+					}
+
+				} catch (FileNotFoundException e) {
+					brStyleCssFile = null;
+					// TODO заменить e.printStackTrace()
+					//e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+				} catch (FileAccessException e) {
+					brStyleCssFile = null;
+					// TODO заменить e.printStackTrace()
+					//e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+				}
+			}
+
+
+			if (brStyleCssFile != null) {
+
+				try {
+
+					String str;
+					// TODO StringBuilder(200) - size ?
+					StringBuilder sbBuf = new StringBuilder(200);
+
+					while (null != (str = brStyleCssFile.readLine())) {
+						sbBuf.append(str);
+						sbBuf.append("\r\n");
+					}
+
+					styleCss = sbBuf.toString();
+
+
+				} catch (IOException e) {
+					styleCss = null;
+
+					// TODO заменить e.printStackTrace()
+					e.printStackTrace();
+				}
+			}
+		}
+
+		return (styleCss == null) ? "" : styleCss;
+	}
 }

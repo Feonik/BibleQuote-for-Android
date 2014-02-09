@@ -23,6 +23,7 @@ public abstract class Module implements Serializable {
 	public String language = "ru_RU";
 
 	protected VersificationMap versificationMap = null;
+	protected String styleCss = null;
 
 
 	public Map<String, Book> Books = new LinkedHashMap<String, Book>();    // to lazy loading on demand
@@ -58,4 +59,7 @@ public abstract class Module implements Serializable {
 	}
 
 	public abstract VersificationMap getVersificationMap();
+
+	public abstract String getStyleCss();
+
 }

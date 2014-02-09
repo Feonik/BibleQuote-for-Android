@@ -137,7 +137,8 @@ public class FsChapterController implements IChapterController {
 			int iTagRegionEnd = iVerseTextRegionStart;
 			int iMcrEnd = iVerseTextRegionStart;
 
-			matcher.usePattern(Pattern.compile("(^|\\G|[^\\p{L}\\d])([\\p{L}\\d]+?)([^\\p{L}\\d]|$)"));
+			matcher.usePattern(Pattern.compile(
+					"(^|\\G|[^\\p{L}\\d]{1,}?)([\\p{L}\\d]{1,}?)([^\\p{L}\\d]{1,}?|$)"));
 
 			if ((iTagRegionStart = sVerseText.indexOf("<", iVerseTextRegionStart)) != -1) {
 

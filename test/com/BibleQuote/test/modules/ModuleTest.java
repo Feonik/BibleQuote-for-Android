@@ -44,6 +44,11 @@ public class ModuleTest {
             public VersificationMap getVersificationMap() {
                 return null;
             }
+
+			  @Override
+			  public String getStyleCss() {
+				  return null;
+			  }
 		  };
         mod.language = null;
         Assert.assertEquals(mod.getLanguage(), "ru");
